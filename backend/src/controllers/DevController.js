@@ -20,9 +20,13 @@ module.exports = {
         `https://api.github.com/users/${github_username}`
       );
 
-      const { name = login, avatar_url, bio } = apiRes.data;
+      let { name = login, avatar_url, bio } = apiRes.data;
 
-      console.log(name, avatar_url, bio, github_username);
+      if(!name){
+        name = apiRes.data.login;
+      }
+
+      console.log(name);
 
       const techsArray = parseStringAsArray(techs);
 
