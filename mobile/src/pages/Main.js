@@ -16,6 +16,7 @@ import {
 } from "expo-location";
 
 import api from "../services/api";
+import { connect, disconnect, subscribeToNewDevs } from "../services/socket";
 
 function Main({ navigation }) {
   const [currentRegion, setCurrentRegion] = useState(null);
@@ -37,6 +38,12 @@ function Main({ navigation }) {
     loadKeyboardPosition();
   });
 
+  function setupWebsocket() {
+    disconnect();
+    const { latitude, longitude } = currentRegion;
+
+    connect(latitude, longitude, techs);
+  }
   useEffect(() => {
     async function loadInitialPosition() {
       const { granted } = await requestPermissionsAsync();
@@ -59,6 +66,10 @@ function Main({ navigation }) {
     loadInitialPosition();
   }, []);
 
+  useEffect(() => {
+    subscribeToNewDevs(dev => setDevs([...devs, dev]));
+  }, [devs]);
+
   if (!currentRegion) {
     return null;
   }
@@ -73,8 +84,10 @@ function Main({ navigation }) {
         techs
       }
     });
-
+    console.log(devs);
     setDevs(response.data.devs);
+    console.log(devs);
+    setupWebsocket();
     Keyboard.dismiss();
   }
 
